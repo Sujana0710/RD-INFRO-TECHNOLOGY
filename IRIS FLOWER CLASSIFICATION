@@ -1,0 +1,64 @@
+import pandas as pd
+
+# Load the dataset
+df = pd.read_csv("Iris.csv")
+
+
+# Exploring the data
+df.head()
+print(df.info())
+print(df.isnull().sum())
+print(df.describe())
+print(df["Species"].value_counts())
+
+
+
+#Preprocessing
+from sklearn.preprocessing import LabelEncoder
+
+label_encoder = LabelEncoder()
+df["Species"] = label_encoder.fit_transform(df["Species"])  # Setosa -> 0, Versicolor -> 1, Virginica -> 2
+
+
+X = df.drop(columns=["Id", "Species"])  # Features (sepal and petal measurements)
+y = df["Species"]  # Target (species classification)
+
+
+# Splitting data
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+
+# Training model
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Making predictions
+y_pred = model.predict(X_test)
+
+# Evaluating model
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Model Accuracy: {accuracy:.2f}")
+
+# Classification report
+print(classification_report(y_test, y_pred))
+
+#Prediction on new data
+new_flower = pd.DataFrame({
+    "SepalLengthCm": [5.1], 
+    "SepalWidthCm": [3.5], 
+    "PetalLengthCm": [1.4], 
+    "PetalWidthCm": [0.2]
+})
+
+predicted_species = model.predict(new_flower)
+species_name = label_encoder.inverse_transform(predicted_species)
+print(f"Predicted Species: {species_name[0]}")
+
+
+
+
